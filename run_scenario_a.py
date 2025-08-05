@@ -47,8 +47,8 @@ def main():
         graph, 
         start_node, 
         end_node,
-        n_steps=200, 
-        learning_rate=0.1,
+        n_steps=400, 
+        learning_rate=0.08,
         n_layers=3
     )
     print("\n--- Kết quả VQE ---")
