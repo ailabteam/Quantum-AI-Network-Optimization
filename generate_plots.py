@@ -1,5 +1,5 @@
 # file: generate_plots.py
-# Version 3.0: English labels, larger fonts, output to results/figures/, AND separate files for subfigures.
+# Version 3.1: Re-added insightful text annotations to static plots.
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -12,8 +12,8 @@ TICK_FONTSIZE = 12
 
 def generate_static_optimizer_plots():
     """
-    Generates and saves SEPARATE convergence plots for VQE and QAOA.
-    This is to match the subfigure structure in the LaTeX document.
+    Generates and saves SEPARATE convergence plots for VQE and QAOA,
+    including text annotations to explain the results.
     """
     print("Generating separate plots for VQE and QAOA convergence...")
 
@@ -36,6 +36,12 @@ def generate_static_optimizer_plots():
     ax1.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
     ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
     
+    # *** ADDING TEXT ANNOTATION BACK ***
+    ax1.text(0.5, 0.6, 'Converged to an\nInvalid Solution State',
+             horizontalalignment='center', verticalalignment='center',
+             transform=ax1.transAxes, fontsize=14, color='darkred',
+             bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
+
     # Save the VQE figure
     vqe_output_path = os.path.join(output_dir, "vqe_sp_convergence.png")
     plt.savefig(vqe_output_path, dpi=600, bbox_inches='tight')
@@ -50,6 +56,12 @@ def generate_static_optimizer_plots():
     ax2.set_xlabel('Optimization Steps', fontsize=LABEL_FONTSIZE)
     ax2.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
     ax2.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    # *** ADDING TEXT ANNOTATION BACK ***
+    ax2.text(0.5, 0.6, 'Non-Convergent Behavior\n(Barren Plateau Indication)',
+             horizontalalignment='center', verticalalignment='center',
+             transform=ax2.transAxes, fontsize=14, color='darkred',
+             bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
 
     # Save the QAOA figure
     qaoa_output_path = os.path.join(output_dir, "qaoa_sp_convergence.png")
@@ -76,7 +88,6 @@ def plot_qrl_learning_curve():
     # --- Plot setup ---
     fig, ax1 = plt.subplots(figsize=(10, 6))
 
-    # Plot Success Rate on the left y-axis
     color = 'tab:blue'
     ax1.set_xlabel('Episode', fontsize=LABEL_FONTSIZE)
     ax1.set_ylabel('Success Rate (100-ep moving average)', color=color, fontsize=LABEL_FONTSIZE)
@@ -90,18 +101,15 @@ def plot_qrl_learning_curve():
     ax1.axhline(y=avg_sr, color=color, linestyle=':', alpha=0.8, label=f'Avg. Success Rate ({avg_sr:.2f})')
     ax1.legend(loc='upper left')
 
-    # Create a second y-axis (right) for the Average Reward
     ax2 = ax1.twinx()
     color = 'tab:red'
     ax2.set_ylabel('Average Reward (100-ep moving average)', color=color, fontsize=LABEL_FONTSIZE)
     ax2.plot(episodes, avg_rewards, color=color, marker='x', linestyle='--', label='Average Reward')
     ax2.tick_params(axis='y', labelcolor=color, labelsize=TICK_FONTSIZE)
 
-    # Title and layout
     plt.title('QRL Agent Performance in Dynamic 8-Node Environment', fontsize=TITLE_FONTSIZE)
     fig.tight_layout()
     
-    # Save the figure
     output_path = os.path.join("results", "figures", "qrl_learning_curve.png")
     plt.savefig(output_path, dpi=600, bbox_inches='tight')
     print(f"QRL plot saved to '{output_path}'")
