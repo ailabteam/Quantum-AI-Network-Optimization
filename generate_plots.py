@@ -1,5 +1,5 @@
 # file: generate_plots.py
-# Version 2.0: English labels, larger fonts, output to results/figures/
+# Version 3.0: English labels, larger fonts, output to results/figures/, AND separate files for subfigures.
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -10,12 +10,12 @@ TITLE_FONTSIZE = 16
 LABEL_FONTSIZE = 14
 TICK_FONTSIZE = 12
 
-def plot_static_optimizer_convergence():
+def generate_static_optimizer_plots():
     """
-    Generates and saves the convergence plots for VQE and QAOA (Figure 1).
-    Data is hardcoded from the terminal outputs.
+    Generates and saves SEPARATE convergence plots for VQE and QAOA.
+    This is to match the subfigure structure in the LaTeX document.
     """
-    print("Generating Figure 1: VQE and QAOA Convergence Plots...")
+    print("Generating separate plots for VQE and QAOA convergence...")
 
     # --- Data from terminal outputs ---
     vqe_steps = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400]
@@ -23,45 +23,46 @@ def plot_static_optimizer_convergence():
     
     qaoa_steps = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     qaoa_energy = [322.10, 330.77, 324.50, 390.31, 341.56, 416.75, 337.08, 309.91, 326.20, 317.49, 322.82, 275.55, 283.64, 259.38, 355.62]
+    
+    output_dir = os.path.join("results", "figures")
 
-    # --- Plot setup ---
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-
-    # VQE Plot
+    # --- Plot 1: VQE Convergence ---
+    plt.figure(figsize=(7, 6))
+    ax1 = plt.gca()
     ax1.plot(vqe_steps, vqe_energy, marker='o', linestyle='-', color='royalblue')
     ax1.set_title('VQE Convergence for Shortest Path', fontsize=TITLE_FONTSIZE)
     ax1.set_xlabel('Optimization Steps', fontsize=LABEL_FONTSIZE)
     ax1.set_ylabel('Energy (Cost Function Value)', fontsize=LABEL_FONTSIZE)
     ax1.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
-    ax1.text(0.5, 0.6, 'Converged to an\nInvalid Solution State',
-             horizontalalignment='center', verticalalignment='center',
-             transform=ax1.transAxes, fontsize=14, color='darkred',
-             bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
+    ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
+    
+    # Save the VQE figure
+    vqe_output_path = os.path.join(output_dir, "vqe_sp_convergence.png")
+    plt.savefig(vqe_output_path, dpi=600, bbox_inches='tight')
+    print(f"VQE plot saved to '{vqe_output_path}'")
+    plt.close()
 
-    # QAOA Plot
+    # --- Plot 2: QAOA Convergence ---
+    plt.figure(figsize=(7, 6))
+    ax2 = plt.gca()
     ax2.plot(qaoa_steps, qaoa_energy, marker='x', linestyle='--', color='crimson')
     ax2.set_title('QAOA Convergence for Shortest Path', fontsize=TITLE_FONTSIZE)
     ax2.set_xlabel('Optimization Steps', fontsize=LABEL_FONTSIZE)
     ax2.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
-    ax2.text(0.5, 0.6, 'Non-Convergent Behavior\n(Barren Plateau Indication)',
-             horizontalalignment='center', verticalalignment='center',
-             transform=ax2.transAxes, fontsize=14, color='darkred',
-             bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
+    ax2.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-    fig.tight_layout()
-
-    # Save the figure
-    output_path = os.path.join("results", "figures", "static_optimizers_convergence.png")
-    plt.savefig(output_path, dpi=600, bbox_inches='tight')
-    print(f"Figure 1 saved to '{output_path}'")
+    # Save the QAOA figure
+    qaoa_output_path = os.path.join(output_dir, "qaoa_sp_convergence.png")
+    plt.savefig(qaoa_output_path, dpi=600, bbox_inches='tight')
+    print(f"QAOA plot saved to '{qaoa_output_path}'")
     plt.close()
 
 
 def plot_qrl_learning_curve():
     """
-    Generates and saves the learning curve plots for the QRL agent (Figure 2).
+    Generates and saves the learning curve plots for the QRL agent.
     """
-    print("Generating Figure 2: QRL Agent Learning Curve...")
+    print("Generating QRL Agent Learning Curve plot...")
 
     # --- Data from terminal outputs ---
     episodes = np.arange(100, 3001, 100)
@@ -85,7 +86,6 @@ def plot_qrl_learning_curve():
     ax1.set_ylim(0, 1.1)
     ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-    # Add a horizontal line for the average success rate
     avg_sr = np.mean(success_rates)
     ax1.axhline(y=avg_sr, color=color, linestyle=':', alpha=0.8, label=f'Avg. Success Rate ({avg_sr:.2f})')
     ax1.legend(loc='upper left')
@@ -104,7 +104,7 @@ def plot_qrl_learning_curve():
     # Save the figure
     output_path = os.path.join("results", "figures", "qrl_learning_curve.png")
     plt.savefig(output_path, dpi=600, bbox_inches='tight')
-    print(f"Figure 2 saved to '{output_path}'")
+    print(f"QRL plot saved to '{output_path}'")
     plt.close()
 
 
@@ -112,17 +112,14 @@ def main():
     """
     Main function to generate all figures and tables for the paper.
     """
-    # Create the output directory structure if it doesn't exist
     output_dir = os.path.join("results", "figures")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print(f"Created directory '{output_dir}'")
         
-    # Generate the plots
-    plot_static_optimizer_convergence()
+    generate_static_optimizer_plots()
     plot_qrl_learning_curve()
     
-    # Print the LaTeX code for Table 1 for easy copying
     print("\n--- LaTeX Code for Table 1 ---")
     table_latex = r"""
 \begin{table}[ht!]
